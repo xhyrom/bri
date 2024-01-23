@@ -7,7 +7,7 @@ use std::path::Path;
 
 use crate::models::errors::PlatformError;
 
-pub async fn download_playlist(url: &str, path: &Path, limit: u64) -> Result<(), PlatformError> {
+pub async fn get_playlist(url: &str, limit: u64) -> Result<Playlist, PlatformError> {
     let playlist = Playlist::get(
         url,
         Some(&PlaylistSearchOptions {
@@ -17,6 +17,12 @@ pub async fn download_playlist(url: &str, path: &Path, limit: u64) -> Result<(),
         }),
     )
     .await?;
+
+    Ok(playlist)
+}
+
+pub async fn download_playlist(url: &str, path: &Path, limit: u64) -> Result<(), PlatformError> {
+    let playlist = get_playlist(url, limit).await?;
 
     for video in playlist.videos {
         download(&video.url, path).await?;
