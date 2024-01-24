@@ -15,3 +15,5 @@ serde_json = "1.0.111"
 
 thiserror = "1.0.56"
 openssl = { version = "0.10", features = ["vendored"] }
+
+id3 = "1.12.0"
