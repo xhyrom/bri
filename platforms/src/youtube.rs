@@ -1,9 +1,10 @@
+use id3::{Tag, TagLike, Version};
 use rusty_ytdl::{
     self,
     search::{Playlist, PlaylistSearchOptions},
-    Video, VideoOptions, VideoQuality, VideoSearchOptions,
+    Video, VideoError, VideoOptions, VideoQuality, VideoSearchOptions,
 };
-use std::path::Path;
+use std::{fs::File, io::Write, path::Path};
 
 use crate::models::errors::PlatformError;
 
@@ -42,11 +43,28 @@ pub async fn download(url: &str, path: &Path) -> Result<(), PlatformError> {
 
     let video = Video::new_with_options(url, options)?;
 
-    let info = video.get_basic_info().await?;
+    let info = video.get_info().await?;
 
-    video
-        .download(path.join(info.video_details.title + ".mp3"))
-        .await?;
+    let stream = video.stream().await.unwrap();
+
+    let path = path.join(info.video_details.video_id + ".mp3");
+    let mut file = File::create(&path).map_err(|e| VideoError::DownloadError(e.to_string()))?;
+
+    while let Some(chunk) = stream.chunk().await.unwrap() {
+        file.write_all(&chunk)
+            .map_err(|e| VideoError::DownloadError(e.to_string()))?;
+    }
+
+    let author_name = info.video_details.author.map(|author| author.name);
+
+    let mut tag = Tag::new();
+    if let Some(name) = author_name {
+        tag.set_artist(name);
+    }
+    tag.set_title(&info.video_details.title);
+
+    tag.write_to_path(&path, Version::Id3v24)
+        .map_err(|e| VideoError::DownloadError(e.to_string()))?;
 
     Ok(())
 }

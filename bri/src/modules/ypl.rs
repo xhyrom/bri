@@ -38,7 +38,7 @@ fn retrieve_playlist_from_cache(path: &Path) -> Result<PlaylistCache, PlaylistLo
 }
 
 async fn fetch_playlist(url: &str) -> Result<PlaylistCache, PlaylistLookError> {
-    let playlist = get_playlist(url, 10_00).await?;
+    let playlist = get_playlist(url, 10_000).await?;
 
     let ids = playlist
         .videos
@@ -116,7 +116,8 @@ pub async fn handle_playlist_look(
     let task = task::spawn(async move {
         loop {
             println!("Checking...");
-            let _ = look(&url, &path, &cache_path).await;
+            let a = look(&url, &path, &cache_path).await;
+            println!("{:?}", a);
 
             println!("Wait {} seconds", interval);
             std::thread::sleep(std::time::Duration::from_secs(interval));

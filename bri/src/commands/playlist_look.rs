@@ -12,5 +12,8 @@ pub async fn handle(matches: &ArgMatches) {
     let path = Path::new(path);
     let cache_path = path.join("cache.json");
 
-    let _ = handle_playlist_look(url, path, &cache_path, interval).await;
+    println!("{:?}", cache_path);
+
+    let b = handle_playlist_look(url, path, &cache_path, interval).await;
+    println!("{:?}", b)
 }
