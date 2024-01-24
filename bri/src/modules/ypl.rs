@@ -115,8 +115,10 @@ pub async fn handle_playlist_look(
 
     let task = task::spawn(async move {
         loop {
+            println!("Checking...");
             let _ = look(&url, &path, &cache_path).await;
 
+            println!("Wait {} seconds", interval);
             std::thread::sleep(std::time::Duration::from_secs(interval));
         }
     });
