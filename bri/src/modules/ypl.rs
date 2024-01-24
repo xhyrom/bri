@@ -1,7 +1,6 @@
 use platforms::{models::errors::PlatformError, youtube::get_playlist};
 use serde::{Deserialize, Serialize};
 use std::{
-    backtrace,
     fs::File,
     io::{BufReader, BufWriter},
     path::{Path, PathBuf},
@@ -16,8 +15,6 @@ struct PlaylistCache {
 
 #[derive(Error, Debug)]
 pub enum PlaylistLookError {
-    #[error("Failed to retrieve playlist from cache")]
-    CacheError,
     #[error("Failed to retrieve playlist from platform")]
     PlatformError(#[from] PlatformError),
     #[error("Failed to open file")]
@@ -116,8 +113,7 @@ pub async fn handle_playlist_look(
     let task = task::spawn(async move {
         loop {
             println!("Checking...");
-            let a = look(&url, &path, &cache_path).await;
-            println!("{:?}", a);
+            let _ = look(&url, &path, &cache_path).await;
 
             println!("Wait {} seconds", interval);
             std::thread::sleep(std::time::Duration::from_secs(interval));

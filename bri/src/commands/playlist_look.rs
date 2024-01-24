@@ -12,8 +12,12 @@ pub async fn handle(matches: &ArgMatches) {
     let path = Path::new(path);
     let cache_path = path.join("cache.json");
 
-    println!("{:?}", cache_path);
+    let result = handle_playlist_look(url, path, &cache_path, interval).await;
 
-    let b = handle_playlist_look(url, path, &cache_path, interval).await;
-    println!("{:?}", b)
+    if result.is_err() {
+        println!("Error: {}", result.err().unwrap());
+        return;
+    }
+
+    println!("Done");
 }
